@@ -1,2 +1,5 @@
-package ro.ubbcluj.map.domain;public enum Status {
+package ro.ubbcluj.map.domain;
+
+public enum Status {
+    APPROVED,REJECTED,PENDING
 }
