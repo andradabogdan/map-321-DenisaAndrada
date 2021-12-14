@@ -1,4 +1,5 @@
 package ro.ubbcluj.map.domain;
+
 import java.util.Objects;
 
 public class FriendRequest extends Entity<Long>{
