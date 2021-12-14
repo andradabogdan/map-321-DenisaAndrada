@@ -1,6 +1,5 @@
 package ro.ubbcluj.map.repository.db;
 
-
 import ro.ubbcluj.map.domain.FriendRequest;
 import ro.ubbcluj.map.domain.validators.Validator;
 import java.sql.Connection;
