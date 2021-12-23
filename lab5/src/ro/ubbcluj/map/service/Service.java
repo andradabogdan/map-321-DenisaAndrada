@@ -133,5 +133,17 @@ public class Service {
                 .filter(filterCriteria).toList();
     }
 
-
+    public List<Prietenie> showFriendsWithDate(Long userID, int month) {
+        if (month >= 1 && month <= 12) {
+            Predicate<Prietenie> filterCriteria1 = n -> Objects.equals(n.getId1(), userID)
+                    || Objects.equals(n.getId2(), userID);
+            Predicate<Prietenie> filterCriteria2 = n -> n.getData().getMonthValue() == month;
+            Predicate<Prietenie> filterCriteria = filterCriteria1.and(filterCriteria2);
+            List<Prietenie> friendships = toolMethod();
+            return friendships.stream()
+                    .filter(filterCriteria).toList();
+        } else {
+            throw new IllegalArgumentException("Luna trebuie sa fie un numar cuprins intre 1 si 12!");
+        }
+    }
 }

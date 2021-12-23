@@ -188,145 +188,12 @@ public class UI {
                 this.printAllFriendshipsUI();
             } else if (op == 10) {
                 this.showFriendsWithDateUI();
-            } else if (op == 11) {
-                this.addMessageUI();
-            } else if (op == 12) {
-                this.deleteMessageUI();
-            } else if (op == 13) {
-                this.printAllMessagesUI();
-            } else if (op == 14) {
-                this.showConversationsUI();
-            } else if (op == 15) {
-                this.sendFriendRequestUI();
-            } else if (op == 16) {
-                this.deleteFriendRequestUI();
-            } else if (op == 17) {
-                this.updateStatusUI();
-            } else if (op == 18) {
-                this.printAllFriendRequestsUI();
+
             } else if (op == 19) {
                 ok = false;
             } else {
                 System.out.println("Optiunea nu exista! Reincercati!");
             }
-        }
-
-    }
-
-    private void printAllFriendRequestsUI() {
-        Iterable<FriendRequest> friendRequests = this.service.findAllRequests();
-        Iterator var2 = friendRequests.iterator();
-
-        while(var2.hasNext()) {
-            FriendRequest friendRequest = (FriendRequest)var2.next();
-            System.out.println(friendRequest.toString());
-        }
-
-    }
-
-    private void updateStatusUI() {
-        this.printAllFriendRequestsUI();
-        Scanner scanner = new Scanner(System.in);
-
-        try {
-            System.out.println("Introduceti noul status al cererii(approved,rejected,pending):");
-            String stringStatus = scanner.nextLine();
-            System.out.println("Introduceti id-ul cererii de modificat: ");
-            Long id = scanner.nextLong();
-            Status status;
-            if (Objects.equals(stringStatus, "approved")) {
-                status = Status.APPROVED;
-            } else if (Objects.equals(stringStatus, "rejected")) {
-                status = Status.REJECTED;
-            } else {
-                if (!Objects.equals(stringStatus, "pending")) {
-                    throw new IllegalArgumentException("Statusul trebuie sa fie unul dintre [approved, rejected, pending]!");
-                }
-
-                status = Status.PENDING;
-            }
-
-            this.service.updateStatus(id, status);
-        } catch (ValidationException | IllegalArgumentException | NullPointerException var5) {
-            System.out.println(var5.getMessage());
-        }
-
-    }
-
-    private void deleteFriendRequestUI() {
-        this.printAllFriendRequestsUI();
-        Scanner scanner = new Scanner(System.in);
-
-        try {
-            System.out.println("Introduceti id-ul cererii de sters: ");
-            Long id = scanner.nextLong();
-            this.service.deleteRequests(id);
-        } catch (ValidationException | IllegalArgumentException | NullPointerException var3) {
-            System.out.println(var3.getMessage());
-        }
-
-    }
-
-    private void sendFriendRequestUI() {
-        this.printAllUI();
-        Scanner scanner = new Scanner(System.in);
-
-        try {
-            System.out.println("Introduceti id-ul primului utilizator: ");
-            Long id1 = scanner.nextLong();
-            System.out.println("Introduceti id-ul celui de al doilea utilizator: ");
-            Long id2 = scanner.nextLong();
-            this.service.saveRequests(id1, id2, "pending");
-            System.out.println("Cererea a fost trimisa cu succes!");
-        } catch (ValidationException | IllegalArgumentException | NullPointerException var4) {
-            System.out.println(var4.getMessage());
-        }
-
-    }
-
-    private void printAllMessagesUI() {
-        Iterable<Message> messages = this.service.findAllMessages();
-        Iterator var2 = messages.iterator();
-
-        while(var2.hasNext()) {
-            Message message = (Message)var2.next();
-            System.out.println(message.toString());
-        }
-
-    }
-
-    private void deleteMessageUI() {
-        try {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Introduceti id-ul mesajului de sters: ");
-            Long id = scanner.nextLong();
-            this.service.deleteMessage(id);
-            System.out.println("Mesajul a fost sters!");
-        } catch (ValidationException | IllegalArgumentException var3) {
-            System.out.println(var3.getMessage());
-        }
-
-    }
-
-    private void addMessageUI() {
-        this.printAllUI();
-        Scanner scanner = new Scanner(System.in);
-
-        try {
-            System.out.println("Introduceti mesajul: ");
-            String message = scanner.nextLine();
-            System.out.println("Introduceti data (yyyy-mm-dd): ");
-            String data = scanner.nextLine();
-            System.out.println("Introduceti id-ul utilizatorului care trimite mesajul (from): ");
-            Long userID = scanner.nextLong();
-            System.out.println("Introduceti id-ul utilizatorilor la care trimiteti mesajul (to): ");
-            Long toID = scanner.nextLong();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate dateTime = LocalDate.parse(data, formatter);
-            this.service.saveMessage(userID, toID, message, dateTime, 0L);
-            System.out.println("Mesajul a fost trimis!");
-        } catch (ValidationException | IllegalArgumentException var8) {
-            System.out.println(var8.getMessage());
         }
 
     }
@@ -390,29 +257,6 @@ public class UI {
             }
         } catch (ValidationException | NullPointerException | IllegalArgumentException var8) {
             System.out.println(var8.getMessage());
-        }
-
-    }
-
-    private void showConversationsUI() {
-        try {
-            System.out.println("Dati id-ul primului utilizator: ");
-            Scanner scanner = new Scanner(System.in);
-            Long id1 = scanner.nextLong();
-            System.out.println("Dati id-ul celui de al doilea utilizator: ");
-            scanner = new Scanner(System.in);
-            Long id2 = scanner.nextLong();
-            System.out.println("Conversatia intre utilizatorul cu id-ul " + id1 + " si utilizatorul cu id-ul " + id2);
-            System.out.println("----------------------------------------------------------------------------------");
-            List<Message> conversation = this.service.showConversation(id1, id2);
-            Iterator var5 = conversation.iterator();
-
-            while(var5.hasNext()) {
-                Message message = (Message)var5.next();
-                System.out.println(message.toString());
-            }
-        } catch (ValidationException | NullPointerException | IllegalArgumentException var7) {
-            System.out.println(var7.getMessage());
         }
 
     }
