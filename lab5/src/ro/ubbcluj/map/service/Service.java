@@ -3,6 +3,7 @@ import ro.ubbcluj.map.domain.*;
 import ro.ubbcluj.map.domain.graph.AbstractGraph;
 import ro.ubbcluj.map.domain.graph.GraphDB;
 
+import ro.ubbcluj.map.domain.validators.MesajValidator;
 import ro.ubbcluj.map.domain.validators.PrietenieValidator;
 import ro.ubbcluj.map.domain.validators.UtilizatorValidator;
 
@@ -14,12 +15,14 @@ import ro.ubbcluj.map.repository.memory.InMemoryRepository;
 public class Service {
     private final InMemoryRepository<Long, Utilizator> usersRepo;
     private final InMemoryRepository<Long, Prietenie> friendshipsRepo;
+    private final InMemoryRepository<Long, Message> messagesRepo;
+
 
 
     public Service(InMemoryRepository<Long, Utilizator> repository, InMemoryRepository<Long, Prietenie> repository2, InMemoryRepository<Long, Message> repository3, InMemoryRepository<Long, FriendRequest> repository4) {
         this.usersRepo = repository;
         this.friendshipsRepo = repository2;
-
+        this.messagesRepo = repository3;
     }
 
     public void saveUtilizator(String firstName, String lastName) {
@@ -145,5 +148,58 @@ public class Service {
         } else {
             throw new IllegalArgumentException("Luna trebuie sa fie un numar cuprins intre 1 si 12!");
         }
+    }
+    public void saveMessage(Long from_user, Long to_user, String message, LocalDate data, Long reply) {
+        Message currentMessage = new Message(from_user, to_user, message, data, reply);
+        MesajValidator mesajValidator = new MesajValidator();
+        mesajValidator.validate(currentMessage);
+        List<Message> messages = this.showConversation(from_user,to_user);
+        Message lastMessage = new Message();
+        int i=0;
+        for(Message mesaj: messages){
+            if(i==messages.size()-1){
+                lastMessage = mesaj;
+            }
+            i++;
+        }
+        for(Message mesaj : messages){
+            if(Objects.equals(mesaj.getTo(), from_user) && Objects.equals(mesaj.getFrom(), to_user)
+                    && currentMessage.getData().compareTo(mesaj.getData())<0){
+                throw new IllegalArgumentException("Mesajul adaugat trebuie sa fie cronologic dupa mesajul la care se raspunde!");
+            }
+        }
+        if(Objects.equals(lastMessage.getTo(), currentMessage.getTo())
+                && Objects.equals(lastMessage.getFrom(), currentMessage.getFrom())){
+            currentMessage.setReply(0L);
+        }
+        else{
+            currentMessage.setReply(lastMessage.getId());
+        }
+
+        this.messagesRepo.save(currentMessage);
+    }
+
+    public void deleteMessage(Long id) {
+        Message message = this.messagesRepo.findOne(id);
+        MesajValidator mesajValidator = new MesajValidator();
+        mesajValidator.validate(message);
+        this.messagesRepo.delete(id);
+    }
+
+    public Iterable<Message> findAllMessages() {
+        return this.messagesRepo.findAll();
+    }
+    public List<Message> showConversation(Long id1, Long id2) {
+        Iterable<Message> messages = this.messagesRepo.findAll();
+        List<Message> conversation = new ArrayList<>();
+        for(Message message : messages){
+            if((Objects.equals(message.getFrom(), id1) && Objects.equals(message.getTo(), id2))
+                    ||(Objects.equals(message.getFrom(), id2) && Objects.equals(message.getTo(), id1))){
+                conversation.add(message);
+            }
+        }
+        Comparator<Message> mapComparator = (Message m1, Message m2) -> m1.getData().compareTo(m2.getData());
+        conversation.sort(mapComparator);
+        return conversation;
     }
 }

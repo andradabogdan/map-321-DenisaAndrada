@@ -188,7 +188,14 @@ public class UI {
                 this.printAllFriendshipsUI();
             } else if (op == 10) {
                 this.showFriendsWithDateUI();
-
+            } else if (op == 11) {
+                this.addMessageUI();
+            } else if (op == 12) {
+                this.deleteMessageUI();
+            } else if (op == 13) {
+                this.printAllMessagesUI();
+            } else if (op == 14) {
+                this.showConversationsUI();
             } else if (op == 19) {
                 ok = false;
             } else {
@@ -259,5 +266,63 @@ public class UI {
             System.out.println(var8.getMessage());
         }
 
+    }
+    private void printAllMessagesUI() {
+        Iterable<Message> messages = this.service.findAllMessages();
+        for (Message message : messages) {
+            System.out.println(message.toString());
+        }
+    }
+
+    private void deleteMessageUI() {
+        try {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Introduceti id-ul mesajului de sters: ");
+            Long id = scanner.nextLong();
+            this.service.deleteMessage(id);
+            System.out.println("Mesajul a fost sters!");
+        } catch (IllegalArgumentException | ValidationException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void addMessageUI() {
+        this.printAllUI();
+        Scanner scanner = new Scanner(System.in);
+        try {
+            System.out.println("Introduceti mesajul: ");
+            String message = scanner.nextLine();
+            System.out.println("Introduceti data (yyyy-mm-dd): ");
+            String data = scanner.nextLine();
+            System.out.println("Introduceti id-ul utilizatorului care trimite mesajul (from): ");
+            Long userID = scanner.nextLong();
+            System.out.println("Introduceti id-ul utilizatorilor la care trimiteti mesajul (to): ");
+            Long toID = scanner.nextLong();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate dateTime = LocalDate.parse(data, formatter);
+
+            this.service.saveMessage(userID, toID, message, dateTime, 0L);
+            System.out.println("Mesajul a fost trimis!");
+        } catch (IllegalArgumentException | ValidationException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    private void showConversationsUI() {
+        try {
+            System.out.println("Dati id-ul primului utilizator: ");
+            Scanner scanner = new Scanner(System.in);
+            Long id1 = scanner.nextLong();
+            System.out.println("Dati id-ul celui de al doilea utilizator: ");
+            scanner = new Scanner(System.in);
+            Long id2 = scanner.nextLong();
+            System.out.println("Conversatia intre utilizatorul cu id-ul " + id1 + " si utilizatorul cu id-ul " + id2);
+            System.out.println("----------------------------------------------------------------------------------");
+            List<Message> conversation = this.service.showConversation(id1, id2);
+            for (Message message : conversation) {
+                System.out.println(message.toString());
+            }
+        } catch (IllegalArgumentException | ValidationException | NullPointerException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
