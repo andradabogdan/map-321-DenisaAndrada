@@ -196,6 +196,14 @@ public class UI {
                 this.printAllMessagesUI();
             } else if (op == 14) {
                 this.showConversationsUI();
+            } else if (op == 15) {
+                this.sendFriendRequestUI();
+            } else if (op == 16) {
+                this.deleteFriendRequestUI();
+            } else if (op == 17) {
+                this.updateStatusUI();
+            } else if (op == 18) {
+                this.printAllFriendRequestsUI();
             } else if (op == 19) {
                 ok = false;
             } else {
@@ -322,6 +330,66 @@ public class UI {
                 System.out.println(message.toString());
             }
         } catch (IllegalArgumentException | ValidationException | NullPointerException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void printAllFriendRequestsUI() {
+        Iterable<FriendRequest> friendRequests = this.service.findAllRequests();
+        for(FriendRequest friendRequest : friendRequests){
+            System.out.println(friendRequest.toString());
+        }
+    }
+    private void updateStatusUI() {
+        this.printAllFriendRequestsUI();
+        Scanner scanner = new Scanner(System.in);
+        try {
+            System.out.println("Introduceti noul status al cererii(approved,rejected,pending):");
+            String stringStatus = scanner.nextLine();
+            System.out.println("Introduceti id-ul cererii de modificat: ");
+            Long id = scanner.nextLong();
+            Status status;
+            if(Objects.equals(stringStatus, "approved")){
+                status = Status.APPROVED;
+            }
+            else if(Objects.equals(stringStatus, "rejected")){
+                status = Status.REJECTED;
+            }
+            else if(Objects.equals(stringStatus, "pending")){
+                status = Status.PENDING;
+            }
+            else{
+                throw new IllegalArgumentException ("Statusul trebuie sa fie unul dintre [approved, rejected, pending]!");
+            }
+            this.service.updateStatus(id, status);
+        } catch (NullPointerException | ValidationException | IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void deleteFriendRequestUI() {
+        this.printAllFriendRequestsUI();
+        Scanner scanner = new Scanner(System.in);
+        try {
+            System.out.println("Introduceti id-ul cererii de sters: ");
+            Long id = scanner.nextLong();
+            this.service.deleteRequests(id);
+        } catch (NullPointerException | ValidationException | IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void sendFriendRequestUI() {
+        this.printAllUI();
+        Scanner scanner = new Scanner(System.in);
+        try {
+            System.out.println("Introduceti id-ul primului utilizator: ");
+            Long id1 = scanner.nextLong();
+            System.out.println("Introduceti id-ul celui de al doilea utilizator: ");
+            Long id2 = scanner.nextLong();
+            this.service.saveRequests(id1,id2,"pending");
+            System.out.println("Cererea a fost trimisa cu succes!");
+        } catch (NullPointerException | ValidationException | IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
     }

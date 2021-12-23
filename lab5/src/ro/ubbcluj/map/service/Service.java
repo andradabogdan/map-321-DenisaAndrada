@@ -3,6 +3,7 @@ import ro.ubbcluj.map.domain.*;
 import ro.ubbcluj.map.domain.graph.AbstractGraph;
 import ro.ubbcluj.map.domain.graph.GraphDB;
 
+import ro.ubbcluj.map.domain.validators.CerereValidator;
 import ro.ubbcluj.map.domain.validators.MesajValidator;
 import ro.ubbcluj.map.domain.validators.PrietenieValidator;
 import ro.ubbcluj.map.domain.validators.UtilizatorValidator;
@@ -16,13 +17,13 @@ public class Service {
     private final InMemoryRepository<Long, Utilizator> usersRepo;
     private final InMemoryRepository<Long, Prietenie> friendshipsRepo;
     private final InMemoryRepository<Long, Message> messagesRepo;
-
-
+    private final InMemoryRepository<Long, FriendRequest> friendRequestsRepo;
 
     public Service(InMemoryRepository<Long, Utilizator> repository, InMemoryRepository<Long, Prietenie> repository2, InMemoryRepository<Long, Message> repository3, InMemoryRepository<Long, FriendRequest> repository4) {
         this.usersRepo = repository;
         this.friendshipsRepo = repository2;
         this.messagesRepo = repository3;
+        this.friendRequestsRepo = repository4;
     }
 
     public void saveUtilizator(String firstName, String lastName) {
@@ -202,4 +203,47 @@ public class Service {
         conversation.sort(mapComparator);
         return conversation;
     }
+
+    public void saveRequests(Long id1, Long id2, String status){
+
+        Iterable<Prietenie> prietenii = this.friendshipsRepo.findAll();
+        for(Prietenie prietenie : prietenii){
+            if((Objects.equals(prietenie.getId1(), id1) && Objects.equals(prietenie.getId2(), id2))
+                    ||(Objects.equals(prietenie.getId1(), id2) && Objects.equals(prietenie.getId2(), id1))){
+                throw new IllegalArgumentException("Cererea nu se poate trimite! Prietenia exista deja!");
+            }
+            if (Objects.equals(id1, id2))
+                throw new IllegalArgumentException("Un utilizator nu se poate sa se imprieteneasca singur!");
+
+
+            FriendRequest friendRequest = new FriendRequest(id1, id2, status);
+            CerereValidator validator = new CerereValidator();
+            validator.validate(friendRequest);
+            this.friendRequestsRepo.save(friendRequest);
+        }
+    }
+
+    public void deleteRequests(Long id) {
+        FriendRequest friendRequest = this.friendRequestsRepo.findOne(id);
+        CerereValidator cerereValidator = new CerereValidator();
+        cerereValidator.validate(friendRequest);
+        this.friendRequestsRepo.delete(id);
+    }
+
+    public void updateStatus(Long id, Status status) {
+        FriendRequest friendRequest = this.friendRequestsRepo.findOne(id);
+        if(status==Status.REJECTED){
+            deleteRequests(id);
+        }
+        else if(status==Status.APPROVED){
+            deleteRequests(id);
+            this.addFriend(friendRequest.getId1(),friendRequest.getId2(),LocalDate.now());
+        }
+    }
+
+    public Iterable<FriendRequest> findAllRequests() {
+        return this.friendRequestsRepo.findAll();
+    }
+
+
 }
